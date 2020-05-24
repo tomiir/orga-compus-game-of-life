@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int obtener_vecinos(int **mapa, int x, int y, int w, int h){
+int obtener_vecinos(unsigned int **mapa, int x, int y,unsigned int w,unsigned int h){
   int contador = 0;
   for(int i = 0; i <= 1; i++) {
     for (int j = 0; j <= 1; j++) {
@@ -16,16 +16,16 @@ int obtener_vecinos(int **mapa, int x, int y, int w, int h){
   return contador;
 }
 
-void avanzar(int **mapa, int ancho, int alto){
+void avanzar(unsigned int **mapa,unsigned int ancho,unsigned int alto){
   for(int i = 0; i < ancho; i++) {
     for (int j = 0; j < alto; j++) {
-      int vecinos = obtener_vecinos(mapa, i,j, ancho, alto);
+      unsigned int vecinos = obtener_vecinos(mapa, i,j, ancho, alto);
       mapa[i][j] = vecinos == 2 || vecinos == 3;
     }
   }
 }
 
-void dump(int **mapa, int ancho, int alto) {
+void dump(unsigned int **mapa,unsigned int ancho,unsigned int alto) {
   /*Volcar Mapa a archivo*/
   for(int i = 0; i < ancho; i++) {
     for (int j = 0; j < alto; j++) {
@@ -37,14 +37,33 @@ void dump(int **mapa, int ancho, int alto) {
   printf("\n");
 }
 
+int validar_datos(int argc){
+  if (argc == 3){
+    printf("Iniciando \n");
+    return 0;
+  }
+  else{
+    printf("Cantidad incorrecta de parametros. \n");
+    return 1;
+  }
+  
+}
+
 int main(int argc, char** argv){
-  int w = 10;
-  int h = 10;
+  if(validar_datos(argc) != 0){
+    return 1;
+  };
+
+  // Convierto los parametros en enteros
+  int x = atoi(argv[1]);
+  int y = atoi(argv[2]);
+  unsigned int w = x;
+  unsigned int h = y;
 
   // Construir mapa
-  int **mapa = malloc(h*sizeof(int*));
+  unsigned int **mapa = malloc(h*sizeof(unsigned int*));
   for (int i = 0; i < w; i++) {
-    int *fila = malloc(w * sizeof(int));
+    unsigned int *fila = malloc(w * sizeof(unsigned int));
     for(int j = 0; j< h; j++) {
       fila[j] =  rand() < RAND_MAX / 10 ? 1 : 0;
     }

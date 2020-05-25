@@ -1,36 +1,71 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
-int obtener_vecinos(unsigned int **mapa, int x, int y,unsigned int w,unsigned int h){
-  int contador = 0;
-  for(int i = 0; i <= 1; i++) {
-    for (int j = 0; j <= 1; j++) {
-      int _x = (x + i)%w;
-      int _y = (y + i)%h;
+unsigned char* crear_mapa(int filas, int cols) {
+  unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
+  return mapa;
+}
 
-      if (i+j != 0) contador += mapa[_x][_y];
+void liberar_mapa(unsigned char* mapa, int filas) {
+  free(mapa);
+}
+
+unsigned int mapear_posicion(unsigned int x, unsigned int y, unsigned int cols) {
+  return x + y * cols;
+}
+
+
+
+int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols){
+  int contador = 0;
+  for(int i = -1; i <= 1; i++) {
+    for (int j = -1; j <= 1; j++) {
+
+      int _x = (x + i);
+      _x = _x < 0 ? filas - 1 : _x%filas;
+      int _y = (y + j);
+      _y = _y < 0 ? cols - 1 : _y%cols;
+
+      unsigned int pos = mapear_posicion(_x,_y, cols);
+      if (!(i == 0 && j == 0)) contador += mapa[pos] ? 1 : 0;
     }
   }
-  // printf("Fila:%d Columna:%d - Vecinos: %d \n", x, y, contador);
+  // printf("Fila:%d Columna:%d  Valor: %d- Vecinos: %d \n", x, y, mapa[mapear_posicion(x,y,cols)], contador);
   return contador;
 }
 
-void avanzar(unsigned int **mapa,unsigned int ancho,unsigned int alto){
-  for(int i = 0; i < ancho; i++) {
-    for (int j = 0; j < alto; j++) {
-      unsigned int vecinos = obtener_vecinos(mapa, i,j, ancho, alto);
-      mapa[i][j] = vecinos == 2 || vecinos == 3;
+
+void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
+  unsigned char* mapa_tmp = crear_mapa(filas, cols);
+
+  for(int i = 0; i < filas; i++) {
+    for (int j = 0; j < cols; j++) {
+      unsigned int pos = mapear_posicion(i,j, cols);
+      unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
+      int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
+      // printf("Cant Vec: %d  Vive: %d  SobreVive: %d",cant_vecinos, mapa[pos], vive);
+      mapa_tmp[pos] = vive;
     }
   }
+  for(int x = 0; x < filas; x++) {
+    for(int y = 0; y < cols; y++) {
+      unsigned int pos = mapear_posicion(x,y, cols);
+      mapa[pos] = mapa_tmp[pos];
+    }
+  }
+
+  liberar_mapa(mapa_tmp, filas);
 }
 
-void dump(unsigned int **mapa,unsigned int ancho,unsigned int alto) {
+void dump(unsigned char *mapa,unsigned int filas,unsigned int cols) {
   /*Volcar Mapa a archivo*/
-  for(int i = 0; i < ancho; i++) {
-    for (int j = 0; j < alto; j++) {
-      printf("%d", mapa[i][j]);
-      if (j == ancho - 1) printf("\n");
+  for(int i = 0; i < cols; i++) {
+    for (int j = 0; j < filas; j++) {
+      unsigned int pos = mapear_posicion(i,j, cols);
+      printf("%d", mapa[pos]);
+      if (j == filas - 1) printf("\n");
     }
   }
   printf("\n");
@@ -38,7 +73,7 @@ void dump(unsigned int **mapa,unsigned int ancho,unsigned int alto) {
 }
 
 int validar_datos(int argc){
-  if (argc == 3){
+  if (argc >= 5){
     printf("Iniciando \n");
     return 0;
   }
@@ -50,40 +85,41 @@ int validar_datos(int argc){
 }
 
 int main(int argc, char** argv){
-  if(validar_datos(argc) != 0){
-    return 1;
-  };
-
   // Convierto los parametros en enteros
-  int x = atoi(argv[1]);
-  int y = atoi(argv[2]);
-  unsigned int w = x;
-  unsigned int h = y;
-
+  unsigned int num_iter = atoi(argv[1]);
+  unsigned int cols = atoi(argv[2]);
+  unsigned int filas = atoi(argv[3]);
+  char* filename = argv[4];
   // Construir mapa
-  unsigned int **mapa = malloc(h*sizeof(unsigned int*));
-  for (int i = 0; i < w; i++) {
-    unsigned int *fila = malloc(w * sizeof(unsigned int));
-    for(int j = 0; j< h; j++) {
-      fila[j] =  rand() < RAND_MAX / 10 ? 1 : 0;
+  unsigned char* mapa = crear_mapa(filas, cols);
+
+  // abrir archivo
+  FILE* archivo = fopen(filename, "r");
+  if(archivo != NULL) {
+    char linea[256];
+    while(fgets(linea, sizeof(linea), archivo)) {
+      int x = atoi(strtok(linea, " "));
+      int y = atoi(strtok(NULL, " "));
+      if (x > filas || y > cols) {
+        printf("ERROR EN EL ARCHIVO DE ENTRADA \n");
+        printf("Celda [%d, %d] fuera del mapa", x, y);
+        return 1;
+      }
+      unsigned int posicion = mapear_posicion(x,y, cols);
+      mapa[posicion] = 1;
     }
-    mapa[i] = fila;
   }
 
   // Correr
   int k = 0;
-	while (k < 10) {
-		dump(mapa, w, h);
-		avanzar(mapa, w, h);
+	while (k < num_iter) {
+		dump(mapa, filas, cols);
+		avanzar(mapa, filas, cols);
     k++;
-	
   }
 
   // Limpiar
-  for (int i = 0; i < w; i++) {
-    free(mapa[i]);
-  }
-  free(mapa);
+  liberar_mapa(mapa, filas);
 
   return 0;
 }

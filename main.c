@@ -82,7 +82,18 @@ int validar_datos(int argc){
   
 }
 
-
+// Funcion que imprime la matriz en un archivo formato pgm
+void imprimir_pgm(unsigned char** mapa, FILE* pgming, unsigned int h, unsigned int w){ 
+  // h y w son las filas y las columnas
+  int count = 0;
+  int i, j;
+  for (i = 0; i < h; i++) {
+    for (j = 0; j < w; j++) {
+      fprintf(pgming, "%d ", mapa[i][j]); //Copy gray value from array to file
+    }
+    fprintf(pgming, "\n");
+  }
+}
 
 int main(int argc, char** argv){
   // Convierto los parametros en enteros
@@ -92,6 +103,15 @@ int main(int argc, char** argv){
   char* filename = argv[4];
   // Construir mapa
   unsigned int** mapa = crear_mapa(filas, cols);
+
+  // Crear archivo de salida
+  FILE* pgmimg;
+  pgmimg = fopen("my_pgmimg.pgm", "wb"); //write the file in binary mode
+  
+  // Formateo el achivo de salida
+  fprintf(pgmimg, "P2\n"); // Writing Magic Number to the File
+  fprintf(pgmimg, "%d %d\n", cols, filas); // Writing Width and Height into the file
+  fprintf(pgmimg, "1\n"); // Writing the maximum gray value
 
   // abrir archivo
   FILE* archivo = fopen(filename, "r");
@@ -119,7 +139,9 @@ int main(int argc, char** argv){
 
   // Limpiar
   liberar_mapa(mapa, filas);
+  
+  // Cerrar archivo de salida
+  fclose(pgmimg);
 
   return 0;
 }
- 

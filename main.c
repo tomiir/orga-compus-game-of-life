@@ -3,67 +3,73 @@
 #include <string.h>
 #include <unistd.h>
 
-unsigned int** crear_mapa(int filas, int cols) {
-  unsigned int **mapa = malloc(filas*sizeof(unsigned int*));
-  for (int i = 0; i < filas; i++) {
-    unsigned int *fila = calloc(cols,  sizeof(unsigned int));
-    mapa[i] = fila;
-  }
+unsigned char* crear_mapa(int filas, int cols) {
+  unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
   return mapa;
 }
 
-void liberar_mapa(unsigned int** mapa, int filas) {
-    for (int i = 0; i < filas; i++) {
-    free(mapa[i]);
-  }
+void liberar_mapa(unsigned char* mapa, int filas) {
   free(mapa);
 }
 
-int vecinos(unsigned int **mapa, int x, int y,unsigned int filas,unsigned int cols){
+unsigned int mapear_posicion(unsigned int x, unsigned int y, unsigned int cols) {
+  return x + y * cols;
+}
+
+
+
+int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols){
   int contador = 0;
-  // printf("Celda: [%d, %d]: \n ", x ,y);
   for(int i = -1; i <= 1; i++) {
     for (int j = -1; j <= 1; j++) {
 
       int _x = (x + i);
       _x = _x < 0 ? filas - 1 : _x%filas;
-
       int _y = (y + j);
       _y = _y < 0 ? cols - 1 : _y%cols;
 
-      // printf("i: %d, j: %d, posicion corregida: [%d %d]\n",i, j, _x,_y);
-      if (!(i == 0 && j == 0)) contador += mapa[_x][_y] ? 1 : 0;
+      unsigned int pos = mapear_posicion(_x,_y, cols);
+      if (!(i == 0 && j == 0)) contador += mapa[pos] ? 1 : 0;
     }
   }
-  // printf("Fila:%d Columna:%d  Valor: %d- Vecinos: %d \n", x, y, mapa[x][y], contador);
+  // printf("Fila:%d Columna:%d  Valor: %d- Vecinos: %d \n", x, y, mapa[mapear_posicion(x,y,cols)], contador);
   return contador;
 }
 
-void avanzar(unsigned int **mapa, unsigned int filas,unsigned int cols){
-  unsigned int** mapa_tmp = crear_mapa(filas, cols);
+
+void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
+  unsigned char* mapa_tmp = crear_mapa(filas, cols);
 
   for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
+      unsigned int pos = mapear_posicion(i,j, cols);
       unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
-      int vive = mapa[i][j] ? cant_vecinos == 3 || cant_vecinos == 2 : cant_vecinos == 3;
-      mapa_tmp[i][j] = vive;
+      int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
+      // printf("Cant Vec: %d  Vive: %d  SobreVive: %d",cant_vecinos, mapa[pos], vive);
+      mapa_tmp[pos] = vive;
     }
   }
   for(int x = 0; x < filas; x++) {
     for(int y = 0; y < cols; y++) {
-      mapa[x][y] = mapa_tmp[x][y];
+      unsigned int pos = mapear_posicion(x,y, cols);
+      mapa[pos] = mapa_tmp[pos];
     }
   }
 
   liberar_mapa(mapa_tmp, filas);
 }
 
-void dump(unsigned int **mapa,unsigned int filas,unsigned int cols) {
+void dump(unsigned char *mapa,unsigned int filas,unsigned int cols, FILE* pgming) {
   /*Volcar Mapa a archivo*/
-  for(int i = 0; i < cols; i++) {
-    for (int j = 0; j < filas; j++) {
-      printf("%d", mapa[i][j]);
-      if (j == filas - 1) printf("\n");
+  for(unsigned int i = 0; i < cols; i++) {
+    for (unsigned int j = 0; j < filas; j++) {
+      unsigned int pos = mapear_posicion(i,j, cols);
+      printf("%d ", mapa[pos]);
+      fprintf(pgming, "%d ", mapa[pos]);
+      if (j == filas - 1){
+        printf("\n");
+        fprintf(pgming, "\n");
+      }
     }
   }
   printf("\n");
@@ -79,34 +85,33 @@ int validar_datos(int argc){
     printf("Cantidad incorrecta de parametros. \n");
     return 1;
   }
-  
+
 }
 
-// Funcion que imprime la matriz en un archivo formato pgm
-void imprimir_pgm(unsigned char** mapa, FILE* pgming, unsigned int h, unsigned int w){ 
-  // h y w son las filas y las columnas
-  int count = 0;
-  int i, j;
-  for (i = 0; i < h; i++) {
-    for (j = 0; j < w; j++) {
-      fprintf(pgming, "%d ", mapa[i][j]); //Copy gray value from array to file
-    }
-    fprintf(pgming, "\n");
-  }
-}
-
-void set_filename(char* filename, char** argv, int argc){
+void set_filename(char* filename, char** argv, int argc, int iter){
   if (argc == 6){
     if (strcmp(argv[5], "-o") == 0 ){
       // Uso nombre pasado por parametro
-      strcpy(filename,(const char)* argv[6]);
+      printf("1");
+      strcpy(filename, (const char*) &argv[6]);
     }
     else{
       // Uso nombre default
-      strcpy(filename, (const char)* argv[4]);
-    } 
+            printf("2");
+
+      strcpy(filename, "default");
+    }
   }
-  // Agrego la extension 
+  //Agrego el numero de corrida
+  char corrida[10];
+        printf("3");
+
+  sprintf(corrida, "%d", iter);
+        printf("4");
+
+  strcat(filename, corrida);
+
+  // Agrego la extension
   strcat(filename,".pbm");
 }
 
@@ -116,22 +121,11 @@ int main(int argc, char** argv){
   unsigned int cols = atoi(argv[2]);
   unsigned int filas = atoi(argv[3]);
   // Construir mapa
-  unsigned int** mapa = crear_mapa(filas, cols);
-
-  //Crear nombre del archivo de salida
-  char filename[30];
-  set_filename(&filename, argv, argc);
-
-  // Crear archivo de salida
-  FILE* pgmimg;
-  pgmimg = fopen((const char)* filename, "wb"); //write the file in binary mode
-  
-  // Formateo el achivo de salida
-  fprintf(pgmimg, "P2\n"); // Writing Magic Number to the File
-  fprintf(pgmimg, "%d %d\n", cols, filas); // Writing Width and Height into the file
-  fprintf(pgmimg, "1\n"); // Writing the maximum gray value
+  unsigned char* mapa = crear_mapa(filas, cols);
 
   // abrir archivo
+  char* filename = argv[4];
+
   FILE* archivo = fopen(filename, "r");
   if(archivo != NULL) {
     char linea[256];
@@ -143,23 +137,35 @@ int main(int argc, char** argv){
         printf("Celda [%d, %d] fuera del mapa", x, y);
         return 1;
       }
-      mapa[x][y] = 1;
+      unsigned int posicion = mapear_posicion(x,y, cols);
+      mapa[posicion] = 1;
     }
   }
 
   // Correr
+  FILE* pgming;
   int k = 0;
+  char archivo_salida[500];
 	while (k < num_iter) {
-		dump(mapa, filas, cols);
+    // Crear archivo de salida
+    set_filename(archivo_salida, argv, argc, k);
+    pgming = fopen(archivo_salida, "wb"); //write the file in binary mode
+
+    // Formateo el achivo de salida
+    fprintf(pgming, "P1\n");  // Writing Magic Number to the File
+    fprintf(pgming, "%d %d\n", cols, filas); // Writing Width and Height into the file
+    fprintf(pgming, "\n"); // Writing the maximum gray value
+
+		dump(mapa, filas, cols, pgming);
 		avanzar(mapa, filas, cols);
     k++;
   }
 
   // Limpiar
   liberar_mapa(mapa, filas);
-  
+
   // Cerrar archivo de salida
-  fclose(pgmimg);
+  fclose(pgming);
 
   return 0;
 }

@@ -95,18 +95,36 @@ void imprimir_pgm(unsigned char** mapa, FILE* pgming, unsigned int h, unsigned i
   }
 }
 
+void set_filename(char* filename, char** argv, int argc){
+  if (argc == 6){
+    if (strcmp(argv[5], "-o") == 0 ){
+      // Uso nombre pasado por parametro
+      strcpy(filename,(const char)* argv[6]);
+    }
+    else{
+      // Uso nombre default
+      strcpy(filename, (const char)* argv[4]);
+    } 
+  }
+  // Agrego la extension 
+  strcat(filename,".pbm");
+}
+
 int main(int argc, char** argv){
   // Convierto los parametros en enteros
   unsigned int num_iter = atoi(argv[1]);
   unsigned int cols = atoi(argv[2]);
   unsigned int filas = atoi(argv[3]);
-  char* filename = argv[4];
   // Construir mapa
   unsigned int** mapa = crear_mapa(filas, cols);
 
+  //Crear nombre del archivo de salida
+  char filename[30];
+  set_filename(&filename, argv, argc);
+
   // Crear archivo de salida
   FILE* pgmimg;
-  pgmimg = fopen("my_pgmimg.pgm", "wb"); //write the file in binary mode
+  pgmimg = fopen((const char)* filename, "wb"); //write the file in binary mode
   
   // Formateo el achivo de salida
   fprintf(pgmimg, "P2\n"); // Writing Magic Number to the File

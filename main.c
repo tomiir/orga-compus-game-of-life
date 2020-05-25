@@ -59,13 +59,17 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   liberar_mapa(mapa_tmp, filas);
 }
 
-void dump(unsigned char *mapa,unsigned int filas,unsigned int cols) {
+void dump(unsigned char *mapa,unsigned int filas,unsigned int cols, FILE* pgming) {
   /*Volcar Mapa a archivo*/
-  for(int i = 0; i < cols; i++) {
-    for (int j = 0; j < filas; j++) {
+  for(unsigned int i = 0; i < cols; i++) {
+    for (unsigned int j = 0; j < filas; j++) {
       unsigned int pos = mapear_posicion(i,j, cols);
-      printf("%d", mapa[pos]);
-      if (j == filas - 1) printf("\n");
+      printf("%d ", mapa[pos]);
+      fprintf(pgming, "%d ", mapa[pos]);
+      if (j == filas - 1){
+        printf("\n");
+        fprintf(pgming, "\n");
+      }
     }
   }
   printf("\n");
@@ -81,7 +85,7 @@ int validar_datos(int argc){
     printf("Cantidad incorrecta de parametros. \n");
     return 1;
   }
-  
+
 }
 
 int main(int argc, char** argv){
@@ -111,9 +115,18 @@ int main(int argc, char** argv){
   }
 
   // Correr
+  FILE* pgming;
   int k = 0;
 	while (k < num_iter) {
-		dump(mapa, filas, cols);
+    // Crear archivo de salida
+    pgming = fopen("my_pgmimg.pgm", "wb"); //write the file in binary mode
+
+    // Formateo el achivo de salida
+    fprintf(pgming, "P1\n");  // Writing Magic Number to the File
+    fprintf(pgming, "%d %d\n", cols, filas); // Writing Width and Height into the file
+    fprintf(pgming, "\n"); // Writing the maximum gray value
+
+		dump(mapa, filas, cols, pgming);
 		avanzar(mapa, filas, cols);
     k++;
   }
@@ -121,6 +134,8 @@ int main(int argc, char** argv){
   // Limpiar
   liberar_mapa(mapa, filas);
 
+  // Cerrar archivo de salida
+  fclose(pgming);
+
   return 0;
 }
- 

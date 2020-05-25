@@ -3,38 +3,67 @@
 #include <string.h>
 #include <unistd.h>
 
-int obtener_vecinos(unsigned int **mapa, int x, int y,unsigned int w,unsigned int h){
+unsigned int** crear_mapa(int filas, int cols) {
+  unsigned int **mapa = malloc(filas*sizeof(unsigned int*));
+  for (int i = 0; i < filas; i++) {
+    unsigned int *fila = calloc(cols,  sizeof(unsigned int));
+    mapa[i] = fila;
+  }
+  return mapa;
+}
+
+void liberar_mapa(unsigned int** mapa, int filas) {
+    for (int i = 0; i < filas; i++) {
+    free(mapa[i]);
+  }
+  free(mapa);
+}
+
+int vecinos(unsigned int **mapa, int x, int y,unsigned int filas,unsigned int cols){
   int contador = 0;
+  // printf("Celda: [%d, %d]: \n ", x ,y);
   for(int i = -1; i <= 1; i++) {
     for (int j = -1; j <= 1; j++) {
-      int _x = (x + i)%w;
-      int _y = (y + j)%h;
 
-      if (i+j != 0) contador += mapa[_x][_y] ? 1 : 0;
+      int _x = (x + i);
+      _x = _x < 0 ? filas - 1 : _x%filas;
+
+      int _y = (y + j);
+      _y = _y < 0 ? cols - 1 : _y%cols;
+
+      // printf("i: %d, j: %d, posicion corregida: [%d %d]\n",i, j, _x,_y);
+      if (!(i == 0 && j == 0)) contador += mapa[_x][_y] ? 1 : 0;
     }
   }
-  printf("Fila:%d Columna:%d  Valor: %d- Vecinos: %d \n", x, y, mapa[x][y], contador);
+  // printf("Fila:%d Columna:%d  Valor: %d- Vecinos: %d \n", x, y, mapa[x][y], contador);
   return contador;
 }
 
-void avanzar(unsigned int **mapa,unsigned int ancho,unsigned int alto){
-  unsigned int **nuevo_mapa = malloc(sizeof(mapa));
-  nuevo_mapa = mapa;
-  for(int i = 0; i < ancho; i++) {
-    for (int j = 0; j < alto; j++) {
-      unsigned int vecinos = obtener_vecinos(mapa, i,j, ancho, alto);
-      nuevo_mapa[i][j] = vecinos == 2 || vecinos == 3;
+void avanzar(unsigned int **mapa, unsigned int filas,unsigned int cols){
+  unsigned int** mapa_tmp = crear_mapa(filas, cols);
+
+  for(int i = 0; i < filas; i++) {
+    for (int j = 0; j < cols; j++) {
+      unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
+      int vive = mapa[i][j] ? cant_vecinos == 3 || cant_vecinos == 2 : cant_vecinos == 3;
+      mapa_tmp[i][j] = vive;
     }
   }
-  mapa = nuevo_mapa;
+  for(int x = 0; x < filas; x++) {
+    for(int y = 0; y < cols; y++) {
+      mapa[x][y] = mapa_tmp[x][y];
+    }
+  }
+
+  liberar_mapa(mapa_tmp, filas);
 }
 
-void dump(unsigned int **mapa,unsigned int ancho,unsigned int alto) {
+void dump(unsigned int **mapa,unsigned int filas,unsigned int cols) {
   /*Volcar Mapa a archivo*/
-  for(int i = 0; i < alto; i++) {
-    for (int j = 0; j < ancho; j++) {
+  for(int i = 0; i < cols; i++) {
+    for (int j = 0; j < filas; j++) {
       printf("%d", mapa[i][j]);
-      if (j == ancho - 1) printf("\n");
+      if (j == filas - 1) printf("\n");
     }
   }
   printf("\n");
@@ -53,6 +82,8 @@ int validar_datos(int argc){
   
 }
 
+
+
 int main(int argc, char** argv){
   // Convierto los parametros en enteros
   unsigned int num_iter = atoi(argv[1]);
@@ -60,14 +91,7 @@ int main(int argc, char** argv){
   unsigned int filas = atoi(argv[3]);
   char* filename = argv[4];
   // Construir mapa
-  unsigned int **mapa = malloc(filas*sizeof(unsigned int*));
-  for (int i = 0; i < filas; i++) {
-    unsigned int *fila = malloc(cols * sizeof(unsigned int));
-    for(int j = 0; j< cols; j++) {
-      fila[j] =  0;
-    }
-    mapa[i] = fila;
-  }
+  unsigned int** mapa = crear_mapa(filas, cols);
 
   // abrir archivo
   FILE* archivo = fopen(filename, "r");
@@ -85,9 +109,6 @@ int main(int argc, char** argv){
     }
   }
 
-  // por cada linea en el archivo filename -> marcar el punto en el mapa
-
-
   // Correr
   int k = 0;
 	while (k < num_iter) {
@@ -97,10 +118,7 @@ int main(int argc, char** argv){
   }
 
   // Limpiar
-  for (int i = 0; i < filas; i++) {
-    free(mapa[i]);
-  }
-  free(mapa);
+  liberar_mapa(mapa, filas);
 
   return 0;
 }

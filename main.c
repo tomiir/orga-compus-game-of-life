@@ -89,28 +89,20 @@ int validar_datos(int argc){
 }
 
 void set_filename(char* filename, char** argv, int argc, int iter){
-  if (argc == 6){
+  if (argc == 7){
     if (strcmp(argv[5], "-o") == 0 ){
       // Uso nombre pasado por parametro
-      printf("1");
-      strcpy(filename, (const char*) &argv[6]);
+      strcpy(filename, argv[6]);
     }
-    else{
+  } else {
       // Uso nombre default
-            printf("2");
-
       strcpy(filename, "default");
     }
-  }
   //Agrego el numero de corrida
   char corrida[10];
-        printf("3");
-
   sprintf(corrida, "%d", iter);
-        printf("4");
 
   strcat(filename, corrida);
-
   // Agrego la extension
   strcat(filename,".pbm");
 }

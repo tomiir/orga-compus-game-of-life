@@ -3,6 +3,7 @@ main.o: main.c
 
 
 clean: 
-	rm conway *.o
+	find . -type f -iname \*.pbm -delete
+	rm -rf conway output
 
 .PHONY: clean

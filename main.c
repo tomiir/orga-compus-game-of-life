@@ -59,13 +59,17 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   liberar_mapa(mapa_tmp, filas);
 }
 
-void dump(unsigned char *mapa,unsigned int filas,unsigned int cols) {
+void dump(unsigned char *mapa,unsigned int filas,unsigned int cols, FILE* pgming) {
   /*Volcar Mapa a archivo*/
-  for(int i = 0; i < cols; i++) {
-    for (int j = 0; j < filas; j++) {
+  for(unsigned int i = 0; i < cols; i++) {
+    for (unsigned int j = 0; j < filas; j++) {
       unsigned int pos = mapear_posicion(i,j, cols);
-      printf("%d", mapa[pos]);
-      if (j == filas - 1) printf("\n");
+      printf("%d ", mapa[pos]);
+      fprintf(pgming, "%d ", mapa[pos]);
+      if (j == filas - 1){
+        printf("\n");
+        fprintf(pgming, "\n");
+      }
     }
   }
   printf("\n");
@@ -84,19 +88,6 @@ int validar_datos(int argc){
 
 }
 
-// Funcion que imprime la matriz en un archivo formato pgm
-void imprimir_pgm(unsigned char** mapa, FILE* pgming, unsigned int h, unsigned int w){
-  // h y w son las filas y las columnas
-  int count = 0;
-  int i, j;
-  for (i = 0; i < h; i++) {
-    for (j = 0; j < w; j++) {
-      fprintf(pgming, "%d ", mapa[i][j]); //Copy gray value from array to file
-    }
-    fprintf(pgming, "\n");
-  }
-}
-
 int main(int argc, char** argv){
   // Convierto los parametros en enteros
   unsigned int num_iter = atoi(argv[1]);
@@ -105,15 +96,6 @@ int main(int argc, char** argv){
   char* filename = argv[4];
   // Construir mapa
   unsigned char* mapa = crear_mapa(filas, cols);
-
-  // Crear archivo de salida
-  FILE* pgmimg;
-  pgmimg = fopen("my_pgmimg.pgm", "wb"); //write the file in binary mode
-
-  // Formateo el achivo de salida
-  fprintf(pgmimg, "P2\n"); // Writing Magic Number to the File
-  fprintf(pgmimg, "%d %d\n", cols, filas); // Writing Width and Height into the file
-  fprintf(pgmimg, "1\n"); // Writing the maximum gray value
 
   // abrir archivo
   FILE* archivo = fopen(filename, "r");
@@ -133,9 +115,18 @@ int main(int argc, char** argv){
   }
 
   // Correr
+  FILE* pgming;
   int k = 0;
 	while (k < num_iter) {
-		dump(mapa, filas, cols);
+    // Crear archivo de salida
+    pgming = fopen("my_pgmimg.pgm", "wb"); //write the file in binary mode
+
+    // Formateo el achivo de salida
+    fprintf(pgming, "P1\n");  // Writing Magic Number to the File
+    fprintf(pgming, "%d %d\n", cols, filas); // Writing Width and Height into the file
+    fprintf(pgming, "\n"); // Writing the maximum gray value
+
+		dump(mapa, filas, cols, pgming);
 		avanzar(mapa, filas, cols);
     k++;
   }
@@ -144,7 +135,7 @@ int main(int argc, char** argv){
   liberar_mapa(mapa, filas);
 
   // Cerrar archivo de salida
-  fclose(pgmimg);
+  fclose(pgming);
 
   return 0;
 }

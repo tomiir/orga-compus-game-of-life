@@ -123,7 +123,7 @@ jump_map_y:
 
 pos:
 	mult t6, t8
-	mfl t9					# pos = _y * cols
+	mflo t9					# pos = _y * cols
 	add t9, t9, t3			# pos = pos + _x
 
 mapa: 
@@ -132,7 +132,7 @@ mapa:
 	beq t5, 0, end_loop_body	# si estoy en la celda actual salteo al fin del loop
 
 	add t7, t4, t9			# t7 = mapa + pos
-	lw t7, ($t7)				# t7 = *t7
+	lw t7, (t7)				# t7 = *t7
 
 	beq t7, 0, end_loop_body	# si la celda vecina está apagada, no la cuento como vecino
 

@@ -3,29 +3,12 @@
 #include <string.h>
 #include <unistd.h>
 
+extern "C" int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols);
+
 unsigned char* crear_mapa(int filas, int cols) {
   unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
   return mapa;
 }
-
-int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols){
-  unsigned int contador = 0;
-  for(int i = -1; i <= 1; i++) {
-    for (int j = -1; j <= 1; j++) {
-
-      int _x = (x + i);
-      _x = _x < 0 ? filas - 1 : _x%filas;
-      int _y = (y + j);
-      _y = _y < 0 ? cols - 1 : _y%cols;
-
-      unsigned int pos = _x +_y * cols;
-
-      if (!(i == 0 && j == 0)) contador += mapa[pos] ? 1 : 0;
-    }
-  }
-  return contador;
-}
-
 
 void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   unsigned char* mapa_tmp = crear_mapa(filas, cols);

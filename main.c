@@ -8,16 +8,6 @@ unsigned char* crear_mapa(int filas, int cols) {
   return mapa;
 }
 
-void liberar_mapa(unsigned char* mapa, int filas) {
-  free(mapa);
-}
-
-unsigned int mapear_posicion(unsigned int x, unsigned int y, unsigned int cols) {
-  return x + y * cols;
-}
-
-
-
 int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols){
   unsigned int contador = 0;
   for(int i = -1; i <= 1; i++) {
@@ -29,10 +19,10 @@ int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int co
       _y = _y < 0 ? cols - 1 : _y%cols;
 
       unsigned int pos = _x +_y * cols;
+
       if (!(i == 0 && j == 0)) contador += mapa[pos] ? 1 : 0;
     }
   }
-  // printf("Fila:%d Columna:%d  Valor: %d- Vecinos: %d \n", x, y, mapa[mapear_posicion(x,y,cols)], contador);
   return contador;
 }
 
@@ -42,31 +32,31 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
 
   for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
-      unsigned int pos = mapear_posicion(i,j, cols);
+      unsigned int pos = i + j * cols;
       unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
       int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
       // printf("Cant Vec: %d  Vive: %d  SobreVive: %d",cant_vecinos, mapa[pos], vive);
       mapa_tmp[pos] = vive;
+      if(i== 0 || j == 0 || i == filas - 1 || j == cols - 1){
+        printf("Fila:%d Columna:%d  Valor: %d- Vecinos: %d VIVE LA PROX?: %d \n", i, j, mapa[pos], cant_vecinos, mapa_tmp[pos]);
+      } 
     }
   }
-  for(int x = 0; x < filas; x++) {
-    for(int y = 0; y < cols; y++) {
-      unsigned int pos = mapear_posicion(x,y, cols);
-      mapa[pos] = mapa_tmp[pos];
-    }
+  for(int x = 0; x < cols * filas; x++) {
+      mapa[x] = mapa_tmp[x];
   }
 
-  liberar_mapa(mapa_tmp, filas);
+  free(mapa_tmp);
 }
 
 void dump(unsigned char *mapa,unsigned int filas,unsigned int cols, FILE* pgming) {
   /*Volcar Mapa a archivo*/
-  for(unsigned int i = 0; i < cols; i++) {
-    for (unsigned int j = 0; j < filas; j++) {
-      unsigned int pos = mapear_posicion(i,j, cols);
+  for(int i = 0; i < filas; i++) {
+    for (int j = 0; j < cols; j++) {
+      int pos = i + j * cols;
       printf("%d ", mapa[pos]);
       fprintf(pgming, "%d ", mapa[pos]);
-      if (j == filas - 1){
+      if (j == cols - 1){
         printf("\n");
         fprintf(pgming, "\n");
       }
@@ -110,8 +100,8 @@ void set_filename(char* filename, char** argv, int argc, int iter){
 int main(int argc, char** argv){
   // Convierto los parametros en enteros
   unsigned int num_iter = atoi(argv[1]);
-  unsigned int cols = atoi(argv[2]);
-  unsigned int filas = atoi(argv[3]);
+  unsigned int filas = atoi(argv[2]);
+  unsigned int cols = atoi(argv[3]);
   // Construir mapa
   unsigned char* mapa = crear_mapa(filas, cols);
 
@@ -129,7 +119,7 @@ int main(int argc, char** argv){
         printf("Celda [%d, %d] fuera del mapa", x, y);
         return 1;
       }
-      unsigned int posicion = mapear_posicion(x,y, cols);
+      unsigned int posicion = x + y * cols;
       mapa[posicion] = 1;
     }
   }
@@ -154,7 +144,7 @@ int main(int argc, char** argv){
   }
 
   // Limpiar
-  liberar_mapa(mapa, filas);
+  free(mapa);
 
   // Cerrar archivo de salida
   fclose(pgming);

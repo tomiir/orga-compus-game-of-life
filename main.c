@@ -19,7 +19,7 @@ unsigned int mapear_posicion(unsigned int x, unsigned int y, unsigned int cols) 
 
 
 int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols){
-  int contador = 0;
+  unsigned int contador = 0;
   for(int i = -1; i <= 1; i++) {
     for (int j = -1; j <= 1; j++) {
 
@@ -28,7 +28,7 @@ int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int co
       int _y = (y + j);
       _y = _y < 0 ? cols - 1 : _y%cols;
 
-      unsigned int pos = mapear_posicion(_x,_y, cols);
+      unsigned int pos = _x +_y * cols;
       if (!(i == 0 && j == 0)) contador += mapa[pos] ? 1 : 0;
     }
   }

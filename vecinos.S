@@ -92,9 +92,9 @@ _x:
 	lw t3, O_LTA_X(fp)	 		# t3 = _x
 	lw t4, O_A1(fp)				# t4 = x
 	lw t5, O_A3(fp)				# t5 = filas
-	addi t3, t4, t0	  	  		# _x = x + i
+	add t3, t4, t0	  	  		# _x = x + i
 
-	bneg t3, jump_map_x
+	bltz t3, jump_map_x
 	
 	div t3, t5
 	mfhi t3						#_x = _x % filas
@@ -109,9 +109,9 @@ _y:
 	lw t6, O_LTA_Y(fp)			# t6 = _y
 	lw t7, O_A2(fp)				# t7 = y
 	lw t8, O_A4(fp)				# t8 = cols
-	addi t6, t7, t2  	  		# _y = y + j
+	add t6, t7, t2  	  		# _y = y + j
 
-	bneg t6, jump_map_y
+	bltz t6, jump_map_y
 
 	DIV t6, t8
 	MFHI t6					#_y = _y % cols
@@ -122,15 +122,16 @@ jump_map_y:
 	b pos
 
 pos:
-	mult t9, t6, t8			# pos = _y * cols
-	addi t9, t9, t3			# pos = pos + _x
+	mult t6, t8
+	mfl t9					# pos = _y * cols
+	add t9, t9, t3			# pos = pos + _x
 
 mapa: 
 	lw t4, O_A0(fp)			# libero la ref a x (t4) y t4 = mapa
 	or t5, t0, t2			# libero la ref a filas (t5) y t5 = i | j
 	beq t5, 0, end_loop_body	# si estoy en la celda actual salteo al fin del loop
 
-	addi t7, t4, t9			# t7 = mapa + pos
+	add t7, t4, t9			# t7 = mapa + pos
 	lw t7, ($t7)				# t7 = *t7
 
 	beq t7, 0, end_loop_body	# si la celda vecina está apagada, no la cuento como vecino

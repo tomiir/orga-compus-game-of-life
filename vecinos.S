@@ -1,3 +1,4 @@
+
 #include<sys/regdef.h>
 
 #define SS 32
@@ -76,21 +77,21 @@ vecinos:
 
     /* Planteo de loop */
 
-    lw $t0, O_LTA_I(fp)  		# i = -1  
-  	li $t1, END_LOOP	 		# i_j_fin = 2  
+    lw t0, O_LTA_I(fp)  		# i = -1  
+    li t1, END_LOOP	 		# i_j_fin = 2  
 
 start_loop_1:  
 	beq $t0, $t1, end_loop_1  
-	lw $t2, O_LTA_J(fp)  		# j = -1  
+	lw t2, O_LTA_J(fp)  		# j = -1  
 
 start_loop_2:  
   	beq $t2, $t1, end_loop_2  
   	
 /* ========= CUERPO LOOP ========== */
 _x:
-	lw $t3, O_LTA_X(fp) 		# t3 = _x
-	lw $t4, O_A1(fp)			# t4 = x
-	lw $t5, O_A3(fp)			# t5 = filas
+	lw t3, O_LTA_X(fp) 		# t3 = _x
+	lw t4, O_A1(fp)			# t4 = x
+	lw t5, O_A3(fp)			# t5 = filas
 	addi $t3, $t4, $t0  	  	# _x = x + i
 
 	bneg $t3, jump_map_x
@@ -105,9 +106,9 @@ jump_map_x:
 
 
 _y:
-	lw $t6, O_LTA_Y(fp)			# t6 = _y
-	lw $t7, O_A2(fp)			# t7 = y
-	lw $t8, O_A4(fp)			# t8 = cols
+	lw t6, O_LTA_Y(fp)			# t6 = _y
+	lw t7, O_A2(fp)			# t7 = y
+	lw t8, O_A4(fp)			# t8 = cols
 	addi $t6, $t7, $t2  	  	# _y = y + j
 
 	bneg $t6, jump_map_y
@@ -125,16 +126,16 @@ pos:
 	addi $t9, $t9, $t3			# pos = pos + _x
 
 mapa: 
-	lw $t4, O_A0(fp)			# libero la ref a x (t4) y t4 = mapa
-	or $t5, $t0, $t2			# libero la ref a filas (t5) y t5 = i | j
+	lw t4, O_A0(fp)			# libero la ref a x (t4) y t4 = mapa
+	or t5, $t0, $t2			# libero la ref a filas (t5) y t5 = i | j
 	beq $t5, 0, end_loop_body	# si estoy en la celda actual salteo al fin del loop
 
 	addi $t7, $t4, $t9			# t7 = mapa + pos
-	lw $t7, ($t7)				# t7 = *t7
+	lw t7, ($t7)				# t7 = *t7
 
 	beq $t7, 0, end_loop_body	# si la celda vecina está apagada, no la cuento como vecino
 
-	lw $t7, O_LTA_CONT(fp)  
+	lw t7, O_LTA_CONT(fp)  
 	addi $t7, $t7, 1			# contador ++
 	sw $t7, O_LTA_CONT(fp)   	# persisto contador para futuras iteraciones
 

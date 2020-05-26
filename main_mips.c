@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
-extern "C" int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols);
+extern int vecinos(unsigned char*, int , int,unsigned int,unsigned int);
 
 unsigned char* crear_mapa(int filas, int cols) {
   unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));

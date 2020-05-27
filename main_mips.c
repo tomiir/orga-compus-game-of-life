@@ -12,13 +12,13 @@ unsigned char* crear_mapa(int filas, int cols) {
 
 void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   unsigned char* mapa_tmp = crear_mapa(filas, cols);
-
-  for(int i = 0; i < filas; i++) {
+  printf("%p", mapa);  for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
       unsigned int pos = i + j * cols;
       unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
       int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
-      printf("[%d, %d]: Cant Vec: %d  Vive: %d  SobreVive: %d\n",i, j, cant_vecinos, mapa[pos], vive);
+     
+      // printf("[%d, %d]: Cant Vec: %d  Vive: %d  SobreVive: %d\n",i, j, cant_vecinos, mapa[pos], vive);
       mapa_tmp[pos] = vive;
     }
   }

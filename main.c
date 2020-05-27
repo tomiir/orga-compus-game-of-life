@@ -18,7 +18,7 @@ int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int co
       int _y = (y + j);
       _y = _y < 0 ? cols - 1 : _y%cols;
 
-      unsigned int pos = _x +_y * cols;
+      unsigned int pos = _y + _x * cols;
 
       if (!(i == 0 && j == 0)) contador += mapa[pos] ? 1 : 0;
     }
@@ -32,7 +32,8 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
 
   for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
-      unsigned int pos = i + j * cols;
+      unsigned int pos = j + i * cols;
+      printf("[%d %d]  pos: %d\n", i, j, pos);
       unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
       int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
       // printf("Cant Vec: %d  Vive: %d  SobreVive: %d",cant_vecinos, mapa[pos], vive);
@@ -48,9 +49,10 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
 
 void dump(unsigned char *mapa,unsigned int filas,unsigned int cols, FILE* pgming) {
   /*Volcar Mapa a archivo*/
+
   for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
-      int pos = i + j * cols;
+      int pos = j + i * cols;
       printf("%d ", mapa[pos]);
       fprintf(pgming, "%d ", mapa[pos]);
       if (j == cols - 1){
@@ -109,14 +111,14 @@ int main(int argc, char** argv){
   if(archivo != NULL) {
     char linea[256];
     while(fgets(linea, sizeof(linea), archivo)) {
-      int x = atoi(strtok(linea, " "));
-      int y = atoi(strtok(NULL, " "));
-      if (x > filas || y > cols) {
+      int f = atoi(strtok(linea, " "));
+      int c = atoi(strtok(NULL, " "));
+      if (f > filas || c > cols) {
         printf("ERROR EN EL ARCHIVO DE ENTRADA \n");
-        printf("Celda [%d, %d] fuera del mapa", x, y);
+        printf("Celda [%d, %d] fuera del mapa", f, c);
         return 1;
       }
-      unsigned int posicion = x + y * cols;
+      unsigned int posicion = c + f * cols;
       mapa[posicion] = 1;
     }
   }

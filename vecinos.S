@@ -45,7 +45,7 @@ vecinos:
     move fp, sp
 
     /* Store in Argument Building Area */
-    sw   a0, O_A0(fp)
+    sa   a0, O_A0(fp)
     sw   a1, O_A1(fp)
     sw   a2, O_A2(fp)
     sw   a3, O_A3(fp)
@@ -131,9 +131,11 @@ mapa:
 	or t5, t0, t2			# libero la ref a filas (t5) y t5 = i | j
 	beq t5, 0, end_loop_body	# si estoy en la celda actual salteo al fin del loop
 
-	sll t9, 2
+test:
+
 	add t7, t4, t9			# t7 = mapa + pos
-	lw t7, (t7)				# t7 = *t7
+	la t7, (t7)
+	lw t7, 0(t7)				# t7 = *t7
 
 	beq t7, 0, end_loop_body	# si la celda vecina está apagada, no la cuento como vecino
 

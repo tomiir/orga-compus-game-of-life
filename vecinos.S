@@ -45,7 +45,7 @@ vecinos:
     move fp, sp
 
     /* Store in Argument Building Area */
-    sa   a0, O_A0(fp)
+    sw   a0, O_A0(fp)
     sw   a1, O_A1(fp)
     sw   a2, O_A2(fp)
     sw   a3, O_A3(fp)
@@ -133,8 +133,7 @@ mapa:
 
 test:
 
-	add t7, t4, t9			# t7 = mapa + pos
-	la t7, (t7)
+	add t7, t4, t9				# t7 = mapa + pos
 	lw t7, 0(t7)				# t7 = *t7
 
 	beq t7, 0, end_loop_body	# si la celda vecina está apagada, no la cuento como vecino

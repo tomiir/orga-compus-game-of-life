@@ -52,27 +52,27 @@ vecinos:
 
     /* Local and temporary area 16B (2 int, 2 uint) */
     /* contador = 0*/
-    lw t0, 0
+    li t0, 0
     sw t0, O_LTA_CONT(fp)
 
     /* i = -1*/
-    lw t0, -1
+    li t0, -1
     sw t0, O_LTA_I(fp)
 
     /* j = -1*/
-    lw t0, -1
+    li t0, -1
     sw t0, O_LTA_J(fp)
 
     /* _x */
-    lw t0, 0
+    li t0, 0
     sw t0, O_LTA_X(fp)
 
     /* _y */
-    lw t0, 0
+    li t0, 0
     sw t0, O_LTA_Y(fp)
 
     /* pos */
-    lw t0, 0
+    li t0, 0
     sw t0, O_LTA_POS(fp)
 
     /* Planteo de loop */

@@ -96,12 +96,12 @@ _x:
 
 	bltz t3, jump_map_x
 	
-	div t3, t5
+	divu t3, t5
 	mfhi t3						#_x = _x % filas
 	b _y
 	
 jump_map_x:
-	sub t3, t5, 1				# _x = filas - 1
+	subu t3, t5, 1				# _x = filas - 1
 	b _y
 
 
@@ -113,16 +113,16 @@ _y:
 
 	bltz t6, jump_map_y
 
-	div t6, t8
+	divu t6, t8
 	mfhi t6					#_y = _y % cols
 	b pos
 	
 jump_map_y:
-	sub t6, t8, 1				# _y = cols - 1
+	subu t6, t8, 1				# _y = cols - 1
 	b pos
 
 pos:
-	mult t3, t8
+	multu t3, t8
 	mflo t9					# pos = _x * cols
 	add t9, t9, t6			# pos = pos + _y
 
@@ -131,9 +131,8 @@ mapa:
 	or t5, t0, t2			# libero la ref a filas (t5) y t5 = i | j
 	beq t5, 0, end_loop_body	# si estoy en la celda actual salteo al fin del loop
 
-test:
-	add t7, t4, t9				# t7 = mapa + pos
-	lw t7, 0(t7)				# t7 = *t7
+	addu t7, t4, t9				# t7 = mapa + pos
+	lbu t7, 0(t7)				# t7 = *t7
 
 	beq t7, 0, end_loop_body	# si la celda vecina está apagada, no la cuento como vecino
 

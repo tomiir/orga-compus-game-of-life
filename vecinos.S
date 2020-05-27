@@ -122,9 +122,9 @@ jump_map_y:
 	b pos
 
 pos:
-	mult t6, t8
-	mflo t9					# pos = _y * cols
-	add t9, t9, t3			# pos = pos + _x
+	mult t3, t8
+	mflo t9					# pos = _x * cols
+	add t9, t9, t6			# pos = pos + _y
 
 mapa: 
 	lw t4, O_A0(fp)			# libero la ref a x (t4) y t4 = mapa
@@ -132,7 +132,6 @@ mapa:
 	beq t5, 0, end_loop_body	# si estoy en la celda actual salteo al fin del loop
 
 test:
-
 	add t7, t4, t9				# t7 = mapa + pos
 	lw t7, 0(t7)				# t7 = *t7
 

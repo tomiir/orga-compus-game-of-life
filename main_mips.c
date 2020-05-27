@@ -5,6 +5,7 @@
 
 extern int vecinos(unsigned char*, int , int,unsigned int,unsigned int);
 
+
 unsigned char* crear_mapa(int filas, int cols) {
   unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
   return mapa;
@@ -12,13 +13,14 @@ unsigned char* crear_mapa(int filas, int cols) {
 
 void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   unsigned char* mapa_tmp = crear_mapa(filas, cols);
-  printf("%p", mapa);  for(int i = 0; i < filas; i++) {
+
+  for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
-      unsigned int pos = i + j * cols;
+      unsigned int pos = j + i * cols;
+      printf("[%d %d]  pos: %d\n", i, j, pos);
       unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
       int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
-     
-      // printf("[%d, %d]: Cant Vec: %d  Vive: %d  SobreVive: %d\n",i, j, cant_vecinos, mapa[pos], vive);
+      // printf("Cant Vec: %d  Vive: %d  SobreVive: %d",cant_vecinos, mapa[pos], vive);
       mapa_tmp[pos] = vive;
     }
   }
@@ -31,9 +33,10 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
 
 void dump(unsigned char *mapa,unsigned int filas,unsigned int cols, FILE* pgming) {
   /*Volcar Mapa a archivo*/
+
   for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
-      int pos = i + j * cols;
+      int pos = j + i * cols;
       printf("%d ", mapa[pos]);
       fprintf(pgming, "%d ", mapa[pos]);
       if (j == cols - 1){
@@ -92,14 +95,14 @@ int main(int argc, char** argv){
   if(archivo != NULL) {
     char linea[256];
     while(fgets(linea, sizeof(linea), archivo)) {
-      int x = atoi(strtok(linea, " "));
-      int y = atoi(strtok(NULL, " "));
-      if (x > filas || y > cols) {
+      int f = atoi(strtok(linea, " "));
+      int c = atoi(strtok(NULL, " "));
+      if (f > filas || c > cols) {
         printf("ERROR EN EL ARCHIVO DE ENTRADA \n");
-        printf("Celda [%d, %d] fuera del mapa", x, y);
+        printf("Celda [%d, %d] fuera del mapa", f, c);
         return 1;
       }
-      unsigned int posicion = x + y * cols;
+      unsigned int posicion = c + f * cols;
       mapa[posicion] = 1;
     }
   }
@@ -108,7 +111,7 @@ int main(int argc, char** argv){
   FILE* pgming;
   int k = 0;
   char archivo_salida[500];
-	while (k < num_iter) {
+  while (k < num_iter) {
     // Crear archivo de salida
     set_filename(archivo_salida, argv, argc, k);
     pgming = fopen(archivo_salida, "wb"); //write the file in binary mode
@@ -118,8 +121,8 @@ int main(int argc, char** argv){
     fprintf(pgming, "%d %d\n", cols, filas); // Writing Width and Height into the file
     fprintf(pgming, "\n"); // Writing the maximum gray value
 
-		dump(mapa, filas, cols, pgming);
-		avanzar(mapa, filas, cols);
+    dump(mapa, filas, cols, pgming);
+    avanzar(mapa, filas, cols);
     k++;
   }
 

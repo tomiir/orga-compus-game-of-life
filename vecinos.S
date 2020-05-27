@@ -113,8 +113,8 @@ _y:
 
 	bltz t6, jump_map_y
 
-	DIV t6, t8
-	MFHI t6					#_y = _y % cols
+	div t6, t8
+	mfhi t6					#_y = _y % cols
 	b pos
 	
 jump_map_y:
@@ -131,6 +131,7 @@ mapa:
 	or t5, t0, t2			# libero la ref a filas (t5) y t5 = i | j
 	beq t5, 0, end_loop_body	# si estoy en la celda actual salteo al fin del loop
 
+	sll t9, 2
 	add t7, t4, t9			# t7 = mapa + pos
 	lw t7, (t7)				# t7 = *t7
 

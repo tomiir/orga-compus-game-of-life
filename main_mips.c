@@ -17,10 +17,10 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
       unsigned int pos = j + i * cols;
-      printf("[%d %d]  pos: %d\n", i, j, pos);
+      
       unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
       int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
-      // printf("Cant Vec: %d  Vive: %d  SobreVive: %d",cant_vecinos, mapa[pos], vive);
+     
       mapa_tmp[pos] = vive;
     }
   }

@@ -2,10 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
 unsigned char* crear_mapa(int filas, int cols) {
   unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
   return mapa;
+}
+int parametro_es_numerico(char* param){
+  size_t len = strlen(param);
+  for (int i=0; i<len; i++){
+    if(!isdigit(param[i])){
+      return -1;
+    }
+  }
+  return 0;
 }
 
 int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols){
@@ -33,7 +43,6 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
       unsigned int pos = j + i * cols;
-      printf("[%d %d]  pos: %d\n", i, j, pos);
       unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
       int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
       // printf("Cant Vec: %d  Vive: %d  SobreVive: %d",cant_vecinos, mapa[pos], vive);
@@ -65,28 +74,48 @@ void dump(unsigned char *mapa,unsigned int filas,unsigned int cols, FILE* pgming
   printf("\n");
 }
 
-int validar_datos(int argc){
-  if (argc >= 5){
-    printf("Iniciando \n");
-    return 0;
+int validar_datos(int argc, char** argv){
+  int opt;
+  if (argc == 2){
+    while((opt = getopt(argc, argv, "hv")) != -1) {  
+    switch(opt){  
+        case 'h':
+          printf("Info\n");
+          return -1;
+        case 'v':
+          printf("Version 1.0.0\n");
+          return -1;
+        default:
+          fprintf(stderr, "Parametros incorrectos, use -h o -v si usa un solo argumento.\n");
+          return -1;
+      }
+    }
   }
-  else{
-    printf("Cantidad incorrecta de parametros. \n");
-    return 1;
+  if (argc < 4){
+    fprintf(stderr, "Argumentos insuficientes, usar flag -h para ver paramentros obligatorios\n");
+    return -1;
   }
+  for (int i=1; i<4; i++){
+    if ( parametro_es_numerico(argv[i]) != 0 ){
+      fprintf(stderr, "Parametros incorrectos, use -h o -v si usa un solo argumento.\n");
+      return -1;
+    }
+  }
+  return 0; 
+}  
 
-}
 
 void set_filename(char* filename, char** argv, int argc, int iter){
-  if (argc == 7){
-    if (strcmp(argv[5], "-o") == 0 ){
-      // Uso nombre pasado por parametro
+  if(argc>=5){
+    if (strcmp("-o", argv[5])==0){
       strcpy(filename, argv[6]);
     }
-  } else {
-      // Uso nombre default
-      strcpy(filename, "default");
-    }
+  }
+  else{
+    // Uso nombre default
+    strcpy(filename, "default");
+  }
+
   //Agrego el numero de corrida
   char corrida[10];
   sprintf(corrida, "%d", iter);
@@ -98,6 +127,9 @@ void set_filename(char* filename, char** argv, int argc, int iter){
 
 int main(int argc, char** argv){
   // Convierto los parametros en enteros
+  if(validar_datos(argc,argv)<0){
+    return -1;
+  }
   unsigned int num_iter = atoi(argv[1]);
   unsigned int filas = atoi(argv[2]);
   unsigned int cols = atoi(argv[3]);

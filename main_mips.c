@@ -3,29 +3,13 @@
 #include <string.h>
 #include <unistd.h>
 
+extern int vecinos(unsigned char*, int , int,unsigned int,unsigned int);
+
+
 unsigned char* crear_mapa(int filas, int cols) {
   unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
   return mapa;
 }
-
-int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols){
-  unsigned int contador = 0;
-  for(int i = -1; i <= 1; i++) {
-    for (int j = -1; j <= 1; j++) {
-
-      int _x = (x + i);
-      _x = _x < 0 ? filas - 1 : _x%filas;
-      int _y = (y + j);
-      _y = _y < 0 ? cols - 1 : _y%cols;
-
-      unsigned int pos = _y + _x * cols;
-
-      if (!(i == 0 && j == 0)) contador += mapa[pos] ? 1 : 0;
-    }
-  }
-  return contador;
-}
-
 
 void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   unsigned char* mapa_tmp = crear_mapa(filas, cols);
@@ -33,10 +17,10 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
       unsigned int pos = j + i * cols;
-      printf("[%d %d]  pos: %d\n", i, j, pos);
+      
       unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
       int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
-      // printf("Cant Vec: %d  Vive: %d  SobreVive: %d",cant_vecinos, mapa[pos], vive);
+     
       mapa_tmp[pos] = vive;
     }
   }
@@ -127,7 +111,7 @@ int main(int argc, char** argv){
   FILE* pgming;
   int k = 0;
   char archivo_salida[500];
-	while (k < num_iter) {
+  while (k < num_iter) {
     // Crear archivo de salida
     set_filename(archivo_salida, argv, argc, k);
     pgming = fopen(archivo_salida, "wb"); //write the file in binary mode
@@ -137,8 +121,8 @@ int main(int argc, char** argv){
     fprintf(pgming, "%d %d\n", cols, filas); // Writing Width and Height into the file
     fprintf(pgming, "\n"); // Writing the maximum gray value
 
-		dump(mapa, filas, cols, pgming);
-		avanzar(mapa, filas, cols);
+    dump(mapa, filas, cols, pgming);
+    avanzar(mapa, filas, cols);
     k++;
   }
 

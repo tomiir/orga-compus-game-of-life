@@ -1,3 +1,4 @@
 conway
 *.o
 conway.*
+*.pbm

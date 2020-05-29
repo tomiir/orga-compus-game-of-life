@@ -127,13 +127,6 @@ void set_filename(char* filename, char** argv, int argc, int iter){
 }
 
 int main(int argc, char** argv){
-  // Convierto los parametros en enteros
-
-  for(int h = 0; h < argc; h++) {
-    printf("%s\n", argv[h] );
-  }
-
-
   if(validar_datos(argc,argv)<0){
     return -1;
   }

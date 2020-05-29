@@ -34,6 +34,7 @@ int cargar_mapa(unsigned char* mapa, unsigned int filas, unsigned int cols, char
       int c = atoi(input_c);
       if (f < 0 || c < 0 || f >= filas || c > cols) {
         fprintf(stderr, "Error en el archivo de entrada. Celda [%d, %d] fuera del mapa\n", f, c);
+        fclose(archivo);
         return -1;
       }
       unsigned int posicion = c + f * cols;
@@ -64,7 +65,6 @@ int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int co
   }
   return contador;
 }
-
 
 void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   unsigned char* mapa_tmp = crear_mapa(filas, cols);
@@ -171,6 +171,7 @@ int main(int argc, char** argv){
 
   if(cargar_mapa(mapa, filas, cols, filename) < 0) {
     fprintf(stderr, "Error cargando mapa. Cerrando programa...\n");
+    free(mapa);
     return -1;
   }
 
@@ -178,7 +179,7 @@ int main(int argc, char** argv){
   FILE* pgming;
   int k = 0;
   char archivo_salida[500];
-	while (k < num_iter) {
+  while (k < num_iter) {
     // Crear archivo de salida
     set_filename(archivo_salida, argv, argc, k);
     pgming = fopen(archivo_salida, "wb"); //write the file in binary mode
@@ -187,17 +188,15 @@ int main(int argc, char** argv){
     fprintf(pgming, "P1\n");  // Writing Magic Number to the File
     fprintf(pgming, "%d %d\n", cols, filas); // Writing Width and Height into the file
     fprintf(pgming, "\n"); // Writing the maximum gray value
+    dump(mapa, filas, cols, pgming);
+    
+    fclose(pgming);
 
-		dump(mapa, filas, cols, pgming);
-		avanzar(mapa, filas, cols);
+    avanzar(mapa, filas, cols);
     k++;
   }
 
   // Limpiar
   free(mapa);
-
-  // Cerrar archivo de salida
-  fclose(pgming);
-
   return 0;
 }

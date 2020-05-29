@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
-extern int vecinos(unsigned char*, int , int,unsigned int,unsigned int);
+extern int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols);
 
 unsigned char* crear_mapa(int filas, int cols) {
   unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
@@ -36,6 +36,7 @@ int cargar_mapa(unsigned char* mapa, unsigned int filas, unsigned int cols, char
       int c = atoi(input_c);
       if (f < 0 || c < 0 || f >= filas || c > cols) {
         fprintf(stderr, "Error en el archivo de entrada. Celda [%d, %d] fuera del mapa\n", f, c);
+        fclose(archivo);
         return -1;
       }
       unsigned int posicion = c + f * cols;
@@ -48,25 +49,6 @@ int cargar_mapa(unsigned char* mapa, unsigned int filas, unsigned int cols, char
   fclose(archivo);
   return 0;
 }
-
-int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols){
-  unsigned int contador = 0;
-  for(int i = -1; i <= 1; i++) {
-    for (int j = -1; j <= 1; j++) {
-
-      int _x = (x + i);
-      _x = _x < 0 ? filas - 1 : _x%filas;
-      int _y = (y + j);
-      _y = _y < 0 ? cols - 1 : _y%cols;
-
-      unsigned int pos = _y + _x * cols;
-
-      if (!(i == 0 && j == 0)) contador += mapa[pos] ? 1 : 0;
-    }
-  }
-  return contador;
-}
-
 
 void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   unsigned char* mapa_tmp = crear_mapa(filas, cols);
@@ -173,6 +155,7 @@ int main(int argc, char** argv){
 
   if(cargar_mapa(mapa, filas, cols, filename) < 0) {
     fprintf(stderr, "Error cargando mapa. Cerrando programa...\n");
+    free(mapa);
     return -1;
   }
 
@@ -189,17 +172,15 @@ int main(int argc, char** argv){
     fprintf(pgming, "P1\n");  // Writing Magic Number to the File
     fprintf(pgming, "%d %d\n", cols, filas); // Writing Width and Height into the file
     fprintf(pgming, "\n"); // Writing the maximum gray value
-
     dump(mapa, filas, cols, pgming);
+    
+    fclose(pgming);
+
     avanzar(mapa, filas, cols);
     k++;
   }
 
   // Limpiar
   free(mapa);
-
-  // Cerrar archivo de salida
-  fclose(pgming);
-
   return 0;
 }

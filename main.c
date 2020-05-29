@@ -8,7 +8,7 @@ unsigned char* crear_mapa(int filas, int cols) {
   unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
   return mapa;
 }
-int parametro_es_numerico(char* param){
+int es_numerico(char* param){
   size_t len = strlen(param);
   for (int i=0; i<len; i++){
     if(!isdigit(param[i])){
@@ -75,6 +75,7 @@ void dump(unsigned char *mapa,unsigned int filas,unsigned int cols, FILE* pgming
 }
 
 int validar_datos(int argc, char** argv){
+
   int opt;
   if (argc == 2){
     while((opt = getopt(argc, argv, "hv")) != -1) {  
@@ -95,8 +96,8 @@ int validar_datos(int argc, char** argv){
     fprintf(stderr, "Argumentos insuficientes, usar flag -h para ver paramentros obligatorios\n");
     return -1;
   }
-  for (int i=1; i<4; i++){
-    if ( parametro_es_numerico(argv[i]) != 0 ){
+  for (int i=1; i<4; i++) {
+    if (es_numerico(argv[i]) != 0){
       fprintf(stderr, "Parametros incorrectos, use -h o -v si usa un solo argumento.\n");
       return -1;
     }
@@ -106,7 +107,7 @@ int validar_datos(int argc, char** argv){
 
 
 void set_filename(char* filename, char** argv, int argc, int iter){
-  if(argc>=5){
+  if(argc>=7){
     if (strcmp("-o", argv[5])==0){
       strcpy(filename, argv[6]);
     }
@@ -127,9 +128,16 @@ void set_filename(char* filename, char** argv, int argc, int iter){
 
 int main(int argc, char** argv){
   // Convierto los parametros en enteros
+
+  for(int h = 0; h < argc; h++) {
+    printf("%s\n", argv[h] );
+  }
+
+
   if(validar_datos(argc,argv)<0){
     return -1;
   }
+
   unsigned int num_iter = atoi(argv[1]);
   unsigned int filas = atoi(argv[2]);
   unsigned int cols = atoi(argv[3]);
@@ -143,16 +151,22 @@ int main(int argc, char** argv){
   if(archivo != NULL) {
     char linea[256];
     while(fgets(linea, sizeof(linea), archivo)) {
-      int f = atoi(strtok(linea, " "));
-      int c = atoi(strtok(NULL, " "));
-      if (f > filas || c > cols) {
-        printf("ERROR EN EL ARCHIVO DE ENTRADA \n");
-        printf("Celda [%d, %d] fuera del mapa", f, c);
+      char* input_f = strtok(linea, " ");
+      char* input_c = strtok(NULL, "\n");
+      if (!(es_numerico(input_f) && es_numerico(input_c))) {
+        fprintf(stderr, "Error en el archivo de entrada. La celda [%s, %s] contiene caracteres no numéricos.\n", input_f, input_c);
+      }
+      int f = atoi(input_f);
+      int c = atoi(input_c);
+      if (f < 0 || c < 0 || f >= filas || c > cols) {
+        fprintf(stderr, "Error en el archivo de entrada. Celda [%d, %d] fuera del mapa\n", f, c);
         return 1;
       }
       unsigned int posicion = c + f * cols;
       mapa[posicion] = 1;
     }
+  } else {
+    fprintf(stderr, "Error abriendo el archivo de entrada");
   }
 
   // Correr

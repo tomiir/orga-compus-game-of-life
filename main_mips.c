@@ -2,13 +2,52 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 
-extern int vecinos(unsigned char*, int , int,unsigned int,unsigned int);
-
+extern int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int cols);
 
 unsigned char* crear_mapa(int filas, int cols) {
   unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
   return mapa;
+}
+
+int es_numerico(char* param){
+  size_t len = strlen(param);
+  for (int i=0; i<len; i++){
+    if(!isdigit(param[i])){
+      return -1;
+    }
+  }
+  return 0;
+}
+
+int cargar_mapa(unsigned char* mapa, unsigned int filas, unsigned int cols, char* filename) {
+  FILE* archivo = fopen(filename, "r");
+  if(archivo != NULL) {
+    char linea[256];
+    while(fgets(linea, sizeof(linea), archivo)) {
+      char* input_f = strtok(linea, " ");
+      char* input_c = strtok(NULL, "\n");
+      if (!(es_numerico(input_f) == 0 && es_numerico(input_c) == 0)) {
+        fprintf(stderr, "Error en el archivo de entrada. La celda [%s, %s] contiene caracteres no numéricos.\n", input_f, input_c);
+        return -1;
+      }
+      int f = atoi(input_f);
+      int c = atoi(input_c);
+      if (f < 0 || c < 0 || f >= filas || c > cols) {
+        fprintf(stderr, "Error en el archivo de entrada. Celda [%d, %d] fuera del mapa\n", f, c);
+        fclose(archivo);
+        return -1;
+      }
+      unsigned int posicion = c + f * cols;
+      mapa[posicion] = 1;
+    }
+  } else {
+    fprintf(stderr, "Error abriendo el archivo de entrada");
+    return -1;
+  }
+  fclose(archivo);
+  return 0;
 }
 
 void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
@@ -17,10 +56,8 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
       unsigned int pos = j + i * cols;
-      
       unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
       int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
-     
       mapa_tmp[pos] = vive;
     }
   }
@@ -49,28 +86,49 @@ void dump(unsigned char *mapa,unsigned int filas,unsigned int cols, FILE* pgming
   printf("\n");
 }
 
-int validar_datos(int argc){
-  if (argc >= 5){
-    printf("Iniciando \n");
-    return 0;
-  }
-  else{
-    printf("Cantidad incorrecta de parametros. \n");
-    return 1;
-  }
+int validar_datos(int argc, char** argv){
 
-}
+  int opt;
+  if (argc == 2){
+    while((opt = getopt(argc, argv, "hv")) != -1) {  
+    switch(opt){  
+        case 'h':
+          printf("Info\n");
+          return -1;
+        case 'v':
+          printf("Version 1.0.0\n");
+          return -1;
+        default:
+          fprintf(stderr, "Parametros incorrectos, use -h o -v si usa un solo argumento.\n");
+          return -1;
+      }
+    }
+  }
+  if (argc < 4){
+    fprintf(stderr, "Argumentos insuficientes, usar flag -h para ver paramentros obligatorios\n");
+    return -1;
+  }
+  for (int i=1; i<4; i++) {
+    if (es_numerico(argv[i]) != 0 || atoi(argv[i]) <= 0) {
+      fprintf(stderr, "Parametros incorrectos, las iteraciones y el tamaño de la matriz deben ser enteros positivos.\n");
+      return -1;
+    } 
+  }
+  return 0; 
+}  
+
 
 void set_filename(char* filename, char** argv, int argc, int iter){
-  if (argc == 7){
-    if (strcmp(argv[5], "-o") == 0 ){
-      // Uso nombre pasado por parametro
+  if(argc>=7){
+    if (strcmp("-o", argv[5])==0){
       strcpy(filename, argv[6]);
     }
-  } else {
-      // Uso nombre default
-      strcpy(filename, "default");
-    }
+  }
+  else{
+    // Uso nombre default
+    strcpy(filename, "default");
+  }
+
   //Agrego el numero de corrida
   char corrida[10];
   sprintf(corrida, "%d", iter);
@@ -81,7 +139,10 @@ void set_filename(char* filename, char** argv, int argc, int iter){
 }
 
 int main(int argc, char** argv){
-  // Convierto los parametros en enteros
+  if(validar_datos(argc,argv)<0){
+    return -1;
+  }
+
   unsigned int num_iter = atoi(argv[1]);
   unsigned int filas = atoi(argv[2]);
   unsigned int cols = atoi(argv[3]);
@@ -91,20 +152,10 @@ int main(int argc, char** argv){
   // abrir archivo
   char* filename = argv[4];
 
-  FILE* archivo = fopen(filename, "r");
-  if(archivo != NULL) {
-    char linea[256];
-    while(fgets(linea, sizeof(linea), archivo)) {
-      int f = atoi(strtok(linea, " "));
-      int c = atoi(strtok(NULL, " "));
-      if (f > filas || c > cols) {
-        printf("ERROR EN EL ARCHIVO DE ENTRADA \n");
-        printf("Celda [%d, %d] fuera del mapa", f, c);
-        return 1;
-      }
-      unsigned int posicion = c + f * cols;
-      mapa[posicion] = 1;
-    }
+  if(cargar_mapa(mapa, filas, cols, filename) < 0) {
+    fprintf(stderr, "Error cargando mapa. Cerrando programa...\n");
+    free(mapa);
+    return -1;
   }
 
   // Correr
@@ -120,17 +171,15 @@ int main(int argc, char** argv){
     fprintf(pgming, "P1\n");  // Writing Magic Number to the File
     fprintf(pgming, "%d %d\n", cols, filas); // Writing Width and Height into the file
     fprintf(pgming, "\n"); // Writing the maximum gray value
-
     dump(mapa, filas, cols, pgming);
+    
+    fclose(pgming);
+
     avanzar(mapa, filas, cols);
     k++;
   }
 
   // Limpiar
   free(mapa);
-
-  // Cerrar archivo de salida
-  fclose(pgming);
-
   return 0;
 }

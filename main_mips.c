@@ -58,7 +58,6 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
       unsigned int pos = j + i * cols;
       unsigned int cant_vecinos = vecinos(mapa, i,j, filas, cols);
       int vive = mapa[pos] ? (cant_vecinos == 3 || cant_vecinos == 2) : cant_vecinos == 3;
-      // printf("Cant Vec: %d  Vive: %d  SobreVive: %d",cant_vecinos, mapa[pos], vive);
       mapa_tmp[pos] = vive;
     }
   }

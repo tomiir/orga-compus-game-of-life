@@ -109,7 +109,7 @@ int validar_datos(int argc, char** argv){
     while((opt = getopt(argc, argv, "hv")) != -1) {  
     switch(opt){  
         case 'h':
-          printf("Info\n");
+          printf("-V Da la version del programa. -o Prefijo de los archivos de salida.\n Ejemplos:\n conway 10 20 20 glider -o estado\n Representa 10 iteraciones del Juego de la Vida en una matriz de 20x20, con un estado inicial tomado del archivo ‘‘glider’’. \n Los archivos de salida se llamaran estado_n.pbm.\n Si no se da un prefijo para los archivos de salida\n El prefijo sera el nombre del archivo de entrada\n");
           return -1;
         case 'v':
           printf("Version 1.0.0\n");
@@ -147,7 +147,7 @@ void set_filename(char* filename, char** argv, int argc, int iter){
 
   //Agrego el numero de corrida
   char corrida[10];
-  sprintf(corrida, "%d", iter);
+  sprintf(corrida, "_%d", iter);
 
   strcat(filename, corrida);
   // Agrego la extension

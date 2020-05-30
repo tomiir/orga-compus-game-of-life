@@ -4,6 +4,14 @@
 #include <unistd.h>
 #include <ctype.h>
 
+const int MAPA = 0;
+const int ITER = 1;
+const int FILS = 2;
+const int COLS = 3;
+const int INPUT_FILE = 4;
+const int OPTION = 5;
+const int OUT_FILE = 6;
+
 unsigned char* crear_mapa(int filas, int cols) {
   unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
   return mapa;
@@ -136,13 +144,13 @@ int validar_datos(int argc, char** argv){
 
 void set_filename(char* filename, char** argv, int argc, int iter){
   if(argc>=7){
-    if (strcmp("-o", argv[5])==0){
-      strcpy(filename, argv[6]);
+    if (strcmp("-o", argv[OPTION])==0){
+      strcpy(filename, argv[OUT_FILE]);
     }
   }
   else{
     // Uso nombre default
-    strcpy(filename, "default");
+    strcpy(filename, argv[INPUT_FILE]);
   }
 
   //Agrego el numero de corrida
@@ -159,14 +167,14 @@ int main(int argc, char** argv){
     return -1;
   }
 
-  unsigned int num_iter = atoi(argv[1]);
-  unsigned int filas = atoi(argv[2]);
-  unsigned int cols = atoi(argv[3]);
+  unsigned int num_iter = atoi(argv[ITER]);
+  unsigned int filas = atoi(argv[FILS]);
+  unsigned int cols = atoi(argv[COLS]);
   // Construir mapa
   unsigned char* mapa = crear_mapa(filas, cols);
 
   // abrir archivo
-  char* filename = argv[4];
+  char* filename = argv[INPUT_FILE];
 
   if(cargar_mapa(mapa, filas, cols, filename) < 0) {
     fprintf(stderr, "Error cargando mapa. Cerrando programa...\n");
@@ -181,11 +189,11 @@ int main(int argc, char** argv){
    while (k < num_iter) {
     int verbose = 1;
     if(argc == 6 ){
-      verbose = strcmp(argv[5],"-p");
+      verbose = strcmp(argv[OPTION],"-p");
     }
     if (verbose != 0){
       // Crear archivo de salida
-      set_filename(archivo_salida, argv, argc, k);
+      set_filename(archivo_salida, argv, argc, k + 1);
       pgming = fopen(archivo_salida, "wb");                 //write the file in binary mode
 
       // Formateo el achivo de salida

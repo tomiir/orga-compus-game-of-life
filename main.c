@@ -178,18 +178,23 @@ int main(int argc, char** argv){
   FILE* pgming;
   int k = 0;
   char archivo_salida[500];
-  while (k < num_iter) {
-    // Crear archivo de salida
-    set_filename(archivo_salida, argv, argc, k);
-    pgming = fopen(archivo_salida, "wb"); //write the file in binary mode
+   while (k < num_iter) {
+    int verbose = 1;
+    if(argc == 6 ){
+      verbose = strcmp(argv[5],"-p");
+    }
+    if (verbose != 0){
+      // Crear archivo de salida
+      set_filename(archivo_salida, argv, argc, k);
+      pgming = fopen(archivo_salida, "wb");                 //write the file in binary mode
 
-    // Formateo el achivo de salida
-    fprintf(pgming, "P1\n");  // Writing Magic Number to the File
-    fprintf(pgming, "%d %d\n", cols, filas); // Writing Width and Height into the file
-    fprintf(pgming, "\n"); // Writing the maximum gray value
-    dump(mapa, filas, cols, pgming);
-    
-    fclose(pgming);
+      // Formateo el achivo de salida
+      fprintf(pgming, "P1\n");                              // Writing Magic Number to the File
+      fprintf(pgming, "%d %d\n", cols, filas);              // Writing Width and Height into the file
+      fprintf(pgming, "\n"); 
+      dump(mapa, filas, cols, pgming);
+      fclose(pgming);
+    }
 
     avanzar(mapa, filas, cols);
     k++;

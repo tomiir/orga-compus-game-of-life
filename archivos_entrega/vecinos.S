@@ -123,15 +123,15 @@ jump_map_y:
 
 pos:
 	multu t3, t8
-	mflo t9					# pos = _x * cols
-	add t9, t9, t6			# pos = pos + _y
+	mflo t8					# pos = _x * cols
+	add t8, t8, t6			# pos = pos + _y
 
 mapa: 
 	lw t4, O_A0(fp)			# libero la ref a x (t4) y t4 = mapa
 	or t5, t0, t2			# libero la ref a filas (t5) y t5 = i | j
 	beq t5, 0, end_loop_body	# si estoy en la celda actual salteo al fin del loop
 
-	addu t7, t4, t9				# t7 = mapa + pos
+	addu t7, t4, t8				# t7 = mapa + pos
 	lbu t7, 0(t7)				# t7 = *t7
 
 	beq t7, 0, end_loop_body	# si la celda vecina está apagada, no la cuento como vecino

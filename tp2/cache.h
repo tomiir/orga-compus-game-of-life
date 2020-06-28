@@ -61,7 +61,7 @@ void init_main_mem();
 unsigned int get_offset(unsigned int address);
 unsigned int find_set(unsigned int address);
 unsigned int select_oldest(unsigned int setnum);
-unsigned int compare_tag(unsigned int tag, unsigned int set);
+int compare_tag(unsigned int tag, unsigned int set);
 void read_tocache(unsigned int blocknum, unsigned int way, unsigned int set);
 unsigned char read_byte(unsigned int address);
 void write_byte(unsigned int address, unsigned char value);

@@ -1,4 +1,5 @@
 #include "cache.h"
+#include "string.h"
 
 void init_cache() {
     cache.hits = 0;
@@ -7,7 +8,7 @@ void init_cache() {
     for (int i = 0; i < SET_NUM; i++) {
         for (int j = 0; j < WAY_NUM; j++) {
             cache.sets[i].ways[j].valid = false;
-            cache.sets[i].ways[j].numero = 0;
+            cache.sets[i].ways[j].sequence = 0;
         }
     }
 }
@@ -51,7 +52,6 @@ unsigned int select_oldest(unsigned int setnum) {
 }
 
 int compare_tag(unsigned int tag, unsigned int set) {
-  unsigned int way = 0;
   for (int i = 0; i < WAY_NUM; i++) {
     struct block way = cache.sets[set].ways[i];
     if (tag == way.tag) {
@@ -63,7 +63,7 @@ int compare_tag(unsigned int tag, unsigned int set) {
 
 void read_tocache(unsigned int blocknum, unsigned int way, unsigned int set) {
 
-  struct block block = ache.sets[set].ways[way];
+  struct block block = cache.sets[set].ways[way];
   unsigned char block_address = blocknum * BLOCK_SIZE;
   for (int i = 0; i < BLOCK_SIZE; i++) {
     block.data[i] = main_mem.data[block_address + i];
@@ -81,7 +81,7 @@ unsigned char read_byte(unsigned int address) {
   
   // Vemos si hay un hit
   for (int i = 0; i < WAY_NUM; i++) {
-    struct block block = cache.sets[conjunto].ways[i];
+    struct block block = cache.sets[set].ways[i];
     if (block.valid && block.tag == tag) {
       cache.hits++;
       return block.data[offset];
@@ -89,9 +89,13 @@ unsigned char read_byte(unsigned int address) {
   }
   // Miss => cargo el bloque y devuelvo el dato.
   cache.missses++;
-  unsigned int way = select_oldest(conjunto);
-  read_tocache(get_blocknum(address), way, conjunto);
-  return cache.sets[conjunto].ways[way].data[offset];
+  unsigned int way = select_oldest(set);
+  read_tocache(get_blocknum(address), way, set);
+  return cache.sets[set].ways[way].data[offset];
+}
+
+void write_tomem(unsigned int address, unsigned char value) {
+  main_mem.data[address] = value;
 }
 
 void write_byte(unsigned int address, unsigned char value) {
@@ -112,12 +116,7 @@ void write_byte(unsigned int address, unsigned char value) {
 
     // El dato no se encuentra en cache => cargo el bloque y lo escribo.
     cache.missses++;
-    unsigned int way = select_oldest(conjunto);
     write_tomem(address, value);
-}
-
-void write_tomem(unsigned int address, unsigned char value) {
-  main_mem.data[address] = value;
 }
 
 float get_miss_rate() {

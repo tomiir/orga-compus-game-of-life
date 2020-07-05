@@ -16,7 +16,6 @@ void read_file(char *file_path) {
 
   char *remaining;
   while (getline(&line, &len,  file_pointer) != -1) {
-      printf("%s", line);
       if (line[0] == 'R') {
           unsigned int address = atoi(line + 2);
           if (address < MEM_SIZE) {

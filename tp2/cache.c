@@ -68,7 +68,6 @@ void read_tocache(unsigned int blocknum, unsigned int way, unsigned int set) {
   unsigned int block_address = blocknum * BLOCK_SIZE;
   for (unsigned char i = 0; i < BLOCK_SIZE; i++) {
     block.data[i] = main_mem.data[block_address + i];
-    //printf("Valor del bloque de cache en: %d segun read_tocache: %d\n", i, block.data[i]);
   }
   block.sequence = ++cache.lru;
   block.valid = true;
@@ -81,7 +80,6 @@ unsigned char read_byte(unsigned int address) {
   unsigned int set = find_set(address);
   unsigned int tag = get_tag(address);
   unsigned int offset = get_offset(address);
-  //printf("Address: %d - %d %d %d  \n", address,tag,set,offset);
   // Vemos si hay un hit
   for (int i = 0; i < WAY_NUM; i++) {
     struct block block = cache.sets[set].ways[i];
@@ -113,12 +111,14 @@ void write_byte(unsigned int address, unsigned char value) {
         cache.hits++;
         block.data[offset] = value;
         write_tomem(address, value);
+        cache.sets[set].ways[i] = block;
         return;
       }
     }
 
     // El dato no se encuentra en cache => cargo el bloque y lo escribo.
     cache.missses++;
+    
     write_tomem(address, value);
 }
 

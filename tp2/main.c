@@ -15,16 +15,19 @@ void read_file(char *file_path) {
 
   char *remaining;
   while (getline(&line, &len,  file_pointer) != -1) {
+    cache*  cache;
+    main_mem* mem;
       // Caso Flush
       if (strncmp(line, "FLUSH", 5) == 0){
-          printf("Se ejecuta init().\n");
-          init();
+        printf("Se ejecuta init().\n");
+        cache = init_cache();
+        mem = init_main_mem();
       }
       // Caso Read
       else if (line[0] == 'R') {
           unsigned int address = atoi(line + 2);
           if (address < MEM_SIZE) {
-              printf("Se ejecuta read_byte(%i) con resultado: %u.\n", address, read_byte(address));
+              printf("Se ejecuta read_byte(%i) con resultado: %u.\n", address, read_byte(address, cache, mem));
           } else {
               printf("Se intentó ejecutar read_byte(%i), pero la dirección se encuentra fuera de rango.\n", address);
           }
@@ -35,12 +38,12 @@ void read_file(char *file_path) {
           unsigned int value = strtol(remaining + 2, &remaining, 10);
           if (address < MEM_SIZE) {
               printf("Se ejecuta write_byte(%i, %i).\n", address, value);
-              write_byte(address, value);
+              write_byte(address, value, cache, mem);
           } else {
               printf("Se intentó ejecutar write_byte(%i), pero la dirección se encuentra fuera de rango.\n", address);
           }
       } else if (line[0] == 'M' && line[1] == 'R') {
-          printf("Se ejecuta get_miss_rate() con resultado: %f.\n", get_miss_rate());
+          printf("Se ejecuta get_miss_rate() con resultado: %f.\n", get_miss_rate(cache));
       }
       else if (strlen(line) != 1) {
         printf("Se encontró una línea inválida en el archivo de entrada");

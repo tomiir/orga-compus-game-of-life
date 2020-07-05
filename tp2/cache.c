@@ -57,9 +57,9 @@ unsigned int select_oldest(unsigned int setnum, cache* cache) {
     return way;
 }
 
-int compare_tag(unsigned int tag, unsigned int set) {
+int compare_tag(unsigned int tag, unsigned int set, cache* cache) {
   for (int i = 0; i < WAY_NUM; i++) {
-    struct block way = cache.sets[set].ways[i];
+    struct block way = cache->sets[set].ways[i];
     if (tag == way.tag) {
       return 0;
     }

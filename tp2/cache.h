@@ -20,21 +20,20 @@
 
 
 /* Memoria principal. */
-struct main_mem {
+typedef struct main_mem {
   unsigned char data [MEM_SIZE];
 } main_mem;
 
-struct block {
+typedef struct block {
     unsigned int sequence;
     bool valid;
     unsigned char tag;
     unsigned char data[BLOCK_SIZE];
-};
+}block;
 
 struct set {
     struct block ways[WAY_NUM];
 };
-typedef main_mem;
 /**
  * Cache.
  * Tamaño: 16 KB.
@@ -47,13 +46,12 @@ typedef main_mem;
  * Offset: 7 bits.
  */
 
-struct cache {
+typedef struct cache {
     unsigned int hits;
     unsigned int missses;
     unsigned int lru;
     struct set sets[SET_NUM];
 } cache;
-typedef cache;
 void init();
 cache* init_cache();
 main_mem* init_main_mem();
@@ -61,7 +59,7 @@ main_mem* init_main_mem();
 unsigned int get_offset(unsigned int address);
 unsigned int find_set(unsigned int address);
 unsigned int select_oldest(unsigned int setnum, cache* cache);
-int compare_tag(unsigned int tag, unsigned int set);
+int compare_tag(unsigned int tag, unsigned int set, cache* cache);
 void read_tocache(unsigned int blocknum, unsigned int way, unsigned int set, cache* cache, main_mem* main_mem);
 unsigned char read_byte(unsigned int address, cache* cache, main_mem* mem);
 void write_byte(unsigned int address, unsigned char value, cache* cache, main_mem* main_mem);

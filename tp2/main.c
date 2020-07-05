@@ -19,8 +19,8 @@ void read_file(char *file_path) {
     main_mem* mem;
       // Caso Flush
       if (strncmp(line, "FLUSH", 5) == 0){
-          printf("Se ejecuta init().\n");
-          cache = init_cache();
+        printf("Se ejecuta init().\n");
+        cache = init_cache();
         mem = init_main_mem();
       }
       // Caso Read

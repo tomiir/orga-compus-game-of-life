@@ -16,7 +16,10 @@ void read_file(char *file_path) {
 
   char *remaining;
   while (getline(&line, &len,  file_pointer) != -1) {
-      if (line[0] == 'R') {
+      if (strcmp(line, "FLUSH") == 0) {
+        init();
+      }
+      else if (line[0] == 'R') {
           unsigned int address = atoi(line + 2);
           if (address < MEM_SIZE) {
               printf("Se ejecuta read_byte(%i) con resultado: %u.\n", address, read_byte(address));

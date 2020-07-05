@@ -56,7 +56,7 @@ int compare_tag(unsigned int tag, unsigned int set) {
   for (int i = 0; i < WAY_NUM; i++) {
     struct block way = cache.sets[set].ways[i];
     if (tag == way.tag) {
-      return 0;
+      return i;
     }
   }
   return -1;
@@ -81,9 +81,11 @@ unsigned char read_byte(unsigned int address) {
   unsigned int tag = get_tag(address);
   unsigned int offset = get_offset(address);
   // Vemos si hay un hit
-  for (int i = 0; i < WAY_NUM; i++) {
-    struct block block = cache.sets[set].ways[i];
-    if (block.valid && block.tag == tag) {
+
+  int tag_way = compare_tag(tag, set);
+  if (tag_way != -1 ) {
+  struct block block = cache.sets[set].ways[tag_way];
+    if (block.valid) {
       cache.hits++;
       return block.data[offset];
     }
@@ -104,21 +106,20 @@ void write_byte(unsigned int address, unsigned char value) {
     unsigned int tag = get_tag(address);
     unsigned int offset = get_offset(address);
 
-    for (int i = 0; i < WAY_NUM; i++) {
-      struct block block = cache.sets[set].ways[i];
+    int way = compare_tag(tag, set);
+    if (way != -1) {
+      struct block block = cache.sets[set].ways[way];
       // HIT
       if (block.valid && block.tag == tag) {
         cache.hits++;
         block.data[offset] = value;
         write_tomem(address, value);
-        cache.sets[set].ways[i] = block;
+        cache.sets[set].ways[way] = block;
         return;
       }
     }
-
     // El dato no se encuentra en cache => cargo el bloque y lo escribo.
     cache.missses++;
-    
     write_tomem(address, value);
 }
 

@@ -10,18 +10,14 @@ void read_file(char *file_path) {
 
   file_pointer = fopen(file_path, "r");
   if (file_pointer == NULL) {
+    fprintf(stderr, "Error abriendo el archivo de entrada. Cerrando...");
     exit(EXIT_FAILURE);
   }
 
   char *remaining;
   while (getline(&line, &len,  file_pointer) != -1) {
-      // Caso Flush
-      if (strncmp(line, "FLUSH", 5) == 0){
-          printf("Se ejecuta init().\n");
-          init();
-      }
-      // Caso Read
-      else if (line[0] == 'R') {
+      printf("%s", line);
+      if (line[0] == 'R') {
           unsigned int address = atoi(line + 2);
           if (address < MEM_SIZE) {
               printf("Se ejecuta read_byte(%i) con resultado: %u.\n", address, read_byte(address));

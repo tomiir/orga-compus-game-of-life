@@ -14,6 +14,10 @@ const int OUT_FILE = 6;
 
 unsigned char* crear_mapa(int filas, int cols) {
   unsigned char *mapa = calloc(filas, cols *sizeof(unsigned char));
+  if(!mapa){
+    fprintf(stderr, "Error creando mapa. Cerrando programa...\n");
+    return NULL;
+  }
   return mapa;
 }
 
@@ -74,9 +78,11 @@ int vecinos(unsigned char *mapa, int x, int y,unsigned int filas,unsigned int co
   return contador;
 }
 
-void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
+int avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   unsigned char* mapa_tmp = crear_mapa(filas, cols);
-
+  if (!mapa_tmp) {
+    return -1;
+  }
   for(int i = 0; i < filas; i++) {
     for (int j = 0; j < cols; j++) {
       unsigned int pos = j + i * cols;
@@ -90,6 +96,7 @@ void avanzar(unsigned char *mapa, unsigned int filas,unsigned int cols){
   }
 
   free(mapa_tmp);
+  return 0;
 }
 
 void dump(unsigned char *mapa,unsigned int filas,unsigned int cols, FILE* pgming) {
@@ -155,7 +162,7 @@ void set_filename(char* filename, char** argv, int argc, int iter){
 
   //Agrego el numero de corrida
   char corrida[10];
-  sprintf(corrida, "_%d", iter);
+  sprintf(corrida, "_%05d", iter);
 
   strcat(filename, corrida);
   // Agrego la extension
@@ -172,6 +179,9 @@ int main(int argc, char** argv){
   unsigned int cols = atoi(argv[COLS]);
   // Construir mapa
   unsigned char* mapa = crear_mapa(filas, cols);
+  if(!mapa){
+    return -1;
+  }
 
   // abrir archivo
   char* filename = argv[INPUT_FILE];
@@ -204,7 +214,10 @@ int main(int argc, char** argv){
       fclose(pgming);
     }
 
-    avanzar(mapa, filas, cols);
+    int result = avanzar(mapa, filas, cols);
+    if(result < 0) {
+      return -1;
+    }
     k++;
   }
 

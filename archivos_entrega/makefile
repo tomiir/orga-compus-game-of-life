@@ -27,4 +27,7 @@ clean:
 	find . -type f -iname \*.pbm -delete
 	rm -rf conway output
 
+video: 
+	@ffmpeg -f image2 -r 1 -pattern_type glob -i '*.pbm' -vf scale=320:320 animation.avi
+
 .PHONY: clean

@@ -1,11 +1,11 @@
 #include <stdbool.h>
 
-#define TAG 4
-#define TAG_MASK 0xF000
+#define TAG 6
+#define TAG_MASK 0xFC00
 
 
-#define INDEX 5
-#define INDEX_MASK 0xF80
+#define INDEX 3
+#define INDEX_MASK 0x380
 
 
 #define OFFSET 7
@@ -42,8 +42,8 @@ struct set {
  * Conjuntos: 32.
  * Bloque: 128 bytes.
  * Vias: 4.
- * Tag: 4 bits.
- * Index: 5 bits.
+ * Tag: 6 bits.
+ * Index: 3 bits.
  * Offset: 7 bits.
  */
 
